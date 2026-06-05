@@ -16,10 +16,10 @@ class AppIconFetcherRouteServiceProvider extends ServiceProvider
     {
         Route::middleware('api')
             ->prefix('api/v1')
-            ->group($this->modulePath('Http/routes/api.php'));
+            ->group($this->modulePath('Presentation/Http/routes/api.php'));
 
         Route::middleware('web')
-            ->group($this->modulePath('Http/routes/web.php'));
+            ->group($this->modulePath('Presentation/Http/routes/web.php'));
     }
 
     private function modulePath(string $path): string
