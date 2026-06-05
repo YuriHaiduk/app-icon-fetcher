@@ -76,7 +76,7 @@ docker compose -f docker-compose.local.yml --env-file .env.docker exec -T node n
 Copy Laravel environment file:
 
 ```sh
-docker compose -f docker-compose.local.yml --env-file .env.docker exec -T php cp .env.example .env
+cp backend/.env.example backend/.env
 ```
 
 Generate application key:
