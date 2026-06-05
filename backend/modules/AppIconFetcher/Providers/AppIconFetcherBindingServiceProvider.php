@@ -9,8 +9,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
-use Modules\AppIconFetcher\Infrastructure\Providers\AppleAppStoreIconProvider;
-use Modules\AppIconFetcher\Infrastructure\Providers\GooglePlayIconProvider;
+use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
+use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
 use Psr\Log\LoggerInterface;
 
 class AppIconFetcherBindingServiceProvider extends ServiceProvider
@@ -20,14 +20,14 @@ class AppIconFetcherBindingServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(AppleAppStoreIconProvider::class);
-        $this->app->singleton(GooglePlayIconProvider::class);
+        $this->app->singleton(AppleAppStoreIconClient::class);
+        $this->app->singleton(GooglePlayIconClient::class);
 
         $this->app->singleton(FetchAppIconsService::class, function (Application $app): FetchAppIconsService {
             return new FetchAppIconsService(
                 inputResolver: $app->make(AppInputResolver::class),
-                appleProvider: $app->make(AppleAppStoreIconProvider::class),
-                googleProvider: $app->make(GooglePlayIconProvider::class),
+                appleClient: $app->make(AppleAppStoreIconClient::class),
+                googleClient: $app->make(GooglePlayIconClient::class),
                 cache: $app->make(CacheRepository::class),
                 logger: $app->make(LoggerInterface::class),
             );

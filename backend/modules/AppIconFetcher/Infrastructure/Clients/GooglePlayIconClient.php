@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Infrastructure\Providers;
+namespace Modules\AppIconFetcher\Infrastructure\Clients;
 
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
@@ -10,10 +10,10 @@ use Illuminate\Support\Facades\Log;
 use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconProviderInterface;
+use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Throwable;
 
-final class GooglePlayIconProvider implements AppIconProviderInterface
+final class GooglePlayIconClient implements AppIconClientInterface
 {
     private const DetailsUrl = 'https://play.google.com/store/apps/details';
 

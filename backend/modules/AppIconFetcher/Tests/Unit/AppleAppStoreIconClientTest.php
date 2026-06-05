@@ -9,19 +9,19 @@ use Illuminate\Support\Facades\Http;
 use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\Enums\AppInputType;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Providers\AppleAppStoreIconProvider;
+use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
 use Tests\TestCase;
 
-final class AppleAppStoreIconProviderTest extends TestCase
+final class AppleAppStoreIconClientTest extends TestCase
 {
     public function test_it_supports_input_with_apple_app_id(): void
     {
-        $this->assertTrue($this->provider()->supports($this->appleInput()));
+        $this->assertTrue($this->client()->supports($this->appleInput()));
     }
 
     public function test_it_supports_input_with_bundle_id(): void
     {
-        $this->assertTrue($this->provider()->supports($this->bundleInput()));
+        $this->assertTrue($this->client()->supports($this->bundleInput()));
     }
 
     public function test_it_does_not_support_input_without_apple_app_id_and_bundle_id(): void
@@ -33,7 +33,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             appleAppId: null,
         );
 
-        $this->assertFalse($this->provider()->supports($input));
+        $this->assertFalse($this->client()->supports($input));
     }
 
     public function test_it_fetches_icon_by_bundle_id_using_artwork_url_512(): void
@@ -45,7 +45,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             ])),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertSame(StoreType::Apple, $result->store);
         $this->assertTrue($result->found);
@@ -62,7 +62,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             ])),
         ]);
 
-        $result = $this->provider()->fetch($this->appleInput());
+        $result = $this->client()->fetch($this->appleInput());
 
         $this->assertTrue($result->found);
         $this->assertSame('https://example.test/apple-icon-512.png', $result->iconUrl);
@@ -77,7 +77,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             ])),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertTrue($result->found);
         $this->assertSame('https://example.test/icon-100.png', $result->iconUrl);
@@ -92,7 +92,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             ]),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertFalse($result->found);
         $this->assertNull($result->iconUrl);
@@ -107,7 +107,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             ])),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertFalse($result->found);
         $this->assertNull($result->iconUrl);
@@ -120,7 +120,7 @@ final class AppleAppStoreIconProviderTest extends TestCase
             'itunes.apple.com/*' => Http::response(['error' => 'Server error'], 500),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertSame(StoreType::Apple, $result->store);
         $this->assertFalse($result->found);
@@ -128,9 +128,9 @@ final class AppleAppStoreIconProviderTest extends TestCase
         $this->assertSame('Apple App Store is temporarily unavailable.', $result->message);
     }
 
-    private function provider(): AppleAppStoreIconProvider
+    private function client(): AppleAppStoreIconClient
     {
-        return new AppleAppStoreIconProvider;
+        return new AppleAppStoreIconClient;
     }
 
     private function bundleInput(): NormalizedAppInput

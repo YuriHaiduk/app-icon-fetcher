@@ -9,26 +9,26 @@ use Illuminate\Support\Facades\Http;
 use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\Enums\AppInputType;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Providers\GooglePlayIconProvider;
+use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
 use Tests\TestCase;
 
-final class GooglePlayIconProviderTest extends TestCase
+final class GooglePlayIconClientTest extends TestCase
 {
     public function test_it_supports_input_with_bundle_id(): void
     {
-        $this->assertTrue($this->provider()->supports($this->bundleInput()));
+        $this->assertTrue($this->client()->supports($this->bundleInput()));
     }
 
     public function test_it_does_not_support_input_without_bundle_id(): void
     {
-        $this->assertFalse($this->provider()->supports($this->appleOnlyInput()));
+        $this->assertFalse($this->client()->supports($this->appleOnlyInput()));
     }
 
     public function test_it_returns_not_supported_when_fetch_is_called_without_bundle_id(): void
     {
         Http::fake();
 
-        $result = $this->provider()->fetch($this->appleOnlyInput());
+        $result = $this->client()->fetch($this->appleOnlyInput());
 
         $this->assertSame(StoreType::Google, $result->store);
         $this->assertFalse($result->found);
@@ -43,7 +43,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('<html><head><meta property="og:image" content="https://example.test/google-icon.png"></head></html>'),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertSame(StoreType::Google, $result->store);
         $this->assertTrue($result->found);
@@ -59,7 +59,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('<meta content="https://example.test/reversed-icon.png" property="og:image">'),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertTrue($result->found);
         $this->assertSame('https://example.test/reversed-icon.png', $result->iconUrl);
@@ -71,7 +71,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('<meta name="twitter:image" content="https://example.test/twitter-icon.png">'),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertTrue($result->found);
         $this->assertSame('https://example.test/twitter-icon.png', $result->iconUrl);
@@ -83,7 +83,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('<meta property="og:image" content="https://example.test/icon.png?size=512&amp;quality=90">'),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertTrue($result->found);
         $this->assertSame('https://example.test/icon.png?size=512&quality=90', $result->iconUrl);
@@ -95,7 +95,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('Not found', 404),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertFalse($result->found);
         $this->assertNull($result->iconUrl);
@@ -108,7 +108,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('<html><head><title>Google Play</title></head></html>'),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertFalse($result->found);
         $this->assertNull($result->iconUrl);
@@ -121,7 +121,7 @@ final class GooglePlayIconProviderTest extends TestCase
             'play.google.com/*' => Http::response('Server error', 500),
         ]);
 
-        $result = $this->provider()->fetch($this->bundleInput());
+        $result = $this->client()->fetch($this->bundleInput());
 
         $this->assertSame(StoreType::Google, $result->store);
         $this->assertFalse($result->found);
@@ -129,9 +129,9 @@ final class GooglePlayIconProviderTest extends TestCase
         $this->assertSame('Google Play is temporarily unavailable.', $result->message);
     }
 
-    private function provider(): GooglePlayIconProvider
+    private function client(): GooglePlayIconClient
     {
-        return new GooglePlayIconProvider;
+        return new GooglePlayIconClient;
     }
 
     private function bundleInput(): NormalizedAppInput

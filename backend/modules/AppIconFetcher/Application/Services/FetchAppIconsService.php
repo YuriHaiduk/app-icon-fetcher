@@ -10,7 +10,7 @@ use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\AppInputType;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconProviderInterface;
+use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -20,8 +20,8 @@ final readonly class FetchAppIconsService
 
     public function __construct(
         private AppInputResolver $inputResolver,
-        private AppIconProviderInterface $appleProvider,
-        private AppIconProviderInterface $googleProvider,
+        private AppIconClientInterface $appleClient,
+        private AppIconClientInterface $googleClient,
         private CacheRepository $cache,
         private LoggerInterface $logger,
     ) {}
@@ -38,8 +38,8 @@ final readonly class FetchAppIconsService
 
         $result = new FetchAppIconsResult(
             input: $normalizedInput,
-            apple: $this->fetchProvider($normalizedInput, $this->appleProvider),
-            google: $this->fetchProvider($normalizedInput, $this->googleProvider),
+            apple: $this->fetchClient($normalizedInput, $this->appleClient),
+            google: $this->fetchClient($normalizedInput, $this->googleClient),
         );
 
         $this->cache->put($cacheKey, $this->resultToCache($result), self::CacheTtlSeconds);
@@ -47,18 +47,18 @@ final readonly class FetchAppIconsService
         return $result;
     }
 
-    private function fetchProvider(NormalizedAppInput $input, AppIconProviderInterface $provider): StoreIconResult
+    private function fetchClient(NormalizedAppInput $input, AppIconClientInterface $client): StoreIconResult
     {
-        $store = $provider->store();
+        $store = $client->store();
 
-        if (! $provider->supports($input)) {
+        if (! $client->supports($input)) {
             return StoreIconResult::notSupported($store, $this->notSupportedMessage($store));
         }
 
         try {
-            return $provider->fetch($input);
+            return $client->fetch($input);
         } catch (Throwable $exception) {
-            $this->logger->warning('App icon provider failed unexpectedly.', [
+            $this->logger->warning('App icon client failed unexpectedly.', [
                 'store' => $store->value,
                 'bundleId' => $input->bundleId,
                 'appleAppId' => $input->appleAppId,

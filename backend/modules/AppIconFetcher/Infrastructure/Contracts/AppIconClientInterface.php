@@ -8,7 +8,7 @@ use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
 
-interface AppIconProviderInterface
+interface AppIconClientInterface
 {
     public function store(): StoreType;
 
