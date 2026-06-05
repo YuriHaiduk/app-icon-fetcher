@@ -3,5 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Modules\AppIconFetcher\Presentation\Http\Controllers\Api\FetchAppIconsController;
 
-// Module API routes will be defined here.
+Route::get('app-icons', FetchAppIconsController::class)
+    ->name('app-icon-fetcher.api.fetch');
