@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
 use Modules\AppIconFetcher\Presentation\Http\Requests\FetchAppIconsRequest;
 use Modules\AppIconFetcher\Presentation\Http\Resources\FetchAppIconsResource;
+use Symfony\Component\HttpFoundation\Response;
 
 final readonly class FetchAppIconsController
 {
@@ -21,6 +22,6 @@ final readonly class FetchAppIconsController
             $this->fetchAppIcons->fetch($request->appInput()),
         )
             ->response()
-            ->setStatusCode(200);
+            ->setStatusCode(Response::HTTP_OK);
     }
 }
