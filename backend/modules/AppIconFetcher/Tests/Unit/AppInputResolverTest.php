@@ -58,6 +58,46 @@ final class AppInputResolverTest extends TestCase
         $this->assertSame('1330123889', $result->appleAppId);
     }
 
+    public function test_it_resolves_numeric_apple_app_id(): void
+    {
+        $result = $this->resolver()->resolve('6503284107');
+
+        $this->assertSame('6503284107', $result->originalInput);
+        $this->assertSame(AppInputType::AppleAppId, $result->type);
+        $this->assertNull($result->bundleId);
+        $this->assertSame('6503284107', $result->appleAppId);
+    }
+
+    public function test_it_resolves_id_prefixed_apple_app_id(): void
+    {
+        $result = $this->resolver()->resolve('id6503284107');
+
+        $this->assertSame('id6503284107', $result->originalInput);
+        $this->assertSame(AppInputType::AppleAppId, $result->type);
+        $this->assertNull($result->bundleId);
+        $this->assertSame('6503284107', $result->appleAppId);
+    }
+
+    public function test_it_resolves_uppercase_id_prefixed_apple_app_id(): void
+    {
+        $result = $this->resolver()->resolve('ID6503284107');
+
+        $this->assertSame('ID6503284107', $result->originalInput);
+        $this->assertSame(AppInputType::AppleAppId, $result->type);
+        $this->assertNull($result->bundleId);
+        $this->assertSame('6503284107', $result->appleAppId);
+    }
+
+    public function test_it_trims_id_prefixed_apple_app_id(): void
+    {
+        $result = $this->resolver()->resolve('  id6503284107  ');
+
+        $this->assertSame('id6503284107', $result->originalInput);
+        $this->assertSame(AppInputType::AppleAppId, $result->type);
+        $this->assertNull($result->bundleId);
+        $this->assertSame('6503284107', $result->appleAppId);
+    }
+
     public function test_it_rejects_empty_input(): void
     {
         $this->expectException(InvalidAppInputException::class);
@@ -91,6 +131,27 @@ final class AppInputResolverTest extends TestCase
         $this->expectException(InvalidAppInputException::class);
 
         $this->resolver()->resolve('com.u1..relax');
+    }
+
+    public function test_it_rejects_id_without_numeric_apple_app_id(): void
+    {
+        $this->expectException(InvalidAppInputException::class);
+
+        $this->resolver()->resolve('id');
+    }
+
+    public function test_it_rejects_id_prefixed_non_numeric_apple_app_id(): void
+    {
+        $this->expectException(InvalidAppInputException::class);
+
+        $this->resolver()->resolve('idabc');
+    }
+
+    public function test_it_rejects_too_short_numeric_apple_app_id(): void
+    {
+        $this->expectException(InvalidAppInputException::class);
+
+        $this->resolver()->resolve('123');
     }
 
     private function resolver(): AppInputResolver

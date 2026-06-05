@@ -22,6 +22,10 @@ final readonly class AppInputResolver
             return $this->resolveUrl($originalInput);
         }
 
+        if ($this->isValidAppleAppId($originalInput)) {
+            return $this->resolveAppleAppId($originalInput);
+        }
+
         if (! $this->isValidBundleId($originalInput)) {
             throw new InvalidAppInputException('Please provide a valid bundle ID or supported app store URL.');
         }
@@ -31,6 +35,20 @@ final readonly class AppInputResolver
             type: AppInputType::BundleId,
             bundleId: $originalInput,
             appleAppId: null,
+        );
+    }
+
+    private function resolveAppleAppId(string $input): NormalizedAppInput
+    {
+        if (preg_match('/^(?:id)?(\d{5,20})$/i', $input, $matches) !== 1) {
+            throw new InvalidAppInputException('Please provide a valid bundle ID or supported app store URL.');
+        }
+
+        return new NormalizedAppInput(
+            originalInput: $input,
+            type: AppInputType::AppleAppId,
+            bundleId: null,
+            appleAppId: $matches[1],
         );
     }
 
@@ -104,5 +122,10 @@ final readonly class AppInputResolver
     private function isValidBundleId(string $bundleId): bool
     {
         return preg_match('/^(?!.*\.\.)(?!\.)(?!.*\.$)[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+$/', $bundleId) === 1;
+    }
+
+    private function isValidAppleAppId(string $input): bool
+    {
+        return preg_match('/^(?:id)?\d{5,20}$/i', $input) === 1;
     }
 }

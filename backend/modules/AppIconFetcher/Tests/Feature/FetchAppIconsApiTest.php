@@ -120,6 +120,29 @@ final class FetchAppIconsApiTest extends TestCase
             ->assertJsonPath('data.icons.google.message', 'Google Play lookup requires a bundle/package id.');
     }
 
+    public function test_id_prefixed_apple_app_id_input_returns_http_200_and_google_not_supported(): void
+    {
+        Http::fake([
+            'itunes.apple.com/*' => Http::response([
+                'resultCount' => 1,
+                'results' => [
+                    ['artworkUrl512' => 'https://example.test/apple.png'],
+                ],
+            ]),
+        ]);
+
+        $response = $this->getJson('/api/v1/app-icons?input=id6503284107');
+
+        $response->assertOk()
+            ->assertJsonPath('data.input.original', 'id6503284107')
+            ->assertJsonPath('data.input.type', 'apple_app_id')
+            ->assertJsonPath('data.input.bundle_id', null)
+            ->assertJsonPath('data.input.apple_app_id', '6503284107')
+            ->assertJsonPath('data.icons.apple.found', true)
+            ->assertJsonPath('data.icons.google.found', false)
+            ->assertJsonPath('data.icons.google.message', 'Google Play lookup requires a bundle/package id.');
+    }
+
     public function test_google_play_url_input_returns_http_200_and_includes_bundle_id(): void
     {
         $this->fakeStoreResponses(

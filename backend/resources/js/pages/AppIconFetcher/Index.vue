@@ -32,8 +32,8 @@ const { input, result, loading, error, fetchIcons } = useAppIconFetcher();
                 App Icon Fetcher
             </h1>
             <p class="max-w-2xl text-sm text-muted-foreground">
-                Paste a Google Play URL, Apple App Store URL, or bundle/package
-                id to fetch app icons.
+                Paste a Google Play URL, Apple App Store URL, Apple App ID, or
+                bundle/package id to fetch app icons.
             </p>
         </section>
 

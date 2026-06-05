@@ -35,7 +35,7 @@ defineEmits<{
                         :model-value="modelValue"
                         type="text"
                         autocomplete="off"
-                        placeholder="com.example.app or App Store / Google Play URL"
+                        placeholder="com.example.app, 6503284107, id6503284107, or App Store / Google Play URL"
                         :disabled="loading"
                         @update:model-value="
                             $emit('update:modelValue', String($event))

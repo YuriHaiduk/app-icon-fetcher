@@ -7,6 +7,7 @@ namespace Modules\AppIconFetcher\Application\Enums;
 enum AppInputType: string
 {
     case BundleId = 'bundle_id';
+    case AppleAppId = 'apple_app_id';
     case GooglePlayUrl = 'google_play_url';
     case AppleAppStoreUrl = 'apple_app_store_url';
 }
