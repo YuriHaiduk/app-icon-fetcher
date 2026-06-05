@@ -1,0 +1,12 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+
+# Docker environment
+.env
+.env.*
+!.env.docker.example
+
+/.codex
