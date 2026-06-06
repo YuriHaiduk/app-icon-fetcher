@@ -27,7 +27,7 @@ final class FetchAppIconsApiTest extends TestCase
 
     public function test_invalid_input_returns_422(): void
     {
-        $response = $this->getJson('/api/v1/app-icons?input=hello%20world');
+        $response = $this->getJson('/api/v1/app-icons?input=!!!');
 
         $response->assertUnprocessable()
             ->assertJsonPath('errors.input.0', 'Please provide a valid bundle ID or supported app store URL.');
