@@ -11,8 +11,6 @@ use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\AppInputType;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
-use Psr\Log\LoggerInterface;
-use Throwable;
 
 final readonly class FetchAppIconsService
 {
@@ -23,7 +21,6 @@ final readonly class FetchAppIconsService
         private AppIconClientInterface $appleClient,
         private AppIconClientInterface $googleClient,
         private CacheRepository $cache,
-        private LoggerInterface $logger,
     ) {}
 
     public function fetch(string $input): FetchAppIconsResult
@@ -55,18 +52,7 @@ final readonly class FetchAppIconsService
             return StoreIconResult::notSupported($store, $this->notSupportedMessage($store));
         }
 
-        try {
-            return $client->fetch($input);
-        } catch (Throwable $exception) {
-            $this->logger->warning('App icon client failed unexpectedly.', [
-                'store' => $store->value,
-                'bundleId' => $input->bundleId,
-                'appleAppId' => $input->appleAppId,
-                'exception' => $exception->getMessage(),
-            ]);
-
-            return StoreIconResult::failed($store, $this->failedMessage($store));
-        }
+        return $client->fetch($input);
     }
 
     private function cacheKey(NormalizedAppInput $input): string
@@ -83,14 +69,6 @@ final readonly class FetchAppIconsService
         return match ($store) {
             StoreType::Apple => 'Apple App Store lookup requires an Apple app id or bundle/package id.',
             StoreType::Google => 'Google Play lookup requires a bundle/package id.',
-        };
-    }
-
-    private function failedMessage(StoreType $store): string
-    {
-        return match ($store) {
-            StoreType::Apple => 'Apple App Store is temporarily unavailable.',
-            StoreType::Google => 'Google Play is temporarily unavailable.',
         };
     }
 

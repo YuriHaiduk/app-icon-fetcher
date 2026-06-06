@@ -11,7 +11,6 @@ use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
 use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
 use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
-use Psr\Log\LoggerInterface;
 
 class AppIconFetcherBindingServiceProvider extends ServiceProvider
 {
@@ -29,7 +28,6 @@ class AppIconFetcherBindingServiceProvider extends ServiceProvider
                 appleClient: $app->make(AppleAppStoreIconClient::class),
                 googleClient: $app->make(GooglePlayIconClient::class),
                 cache: $app->make(CacheRepository::class),
-                logger: $app->make(LoggerInterface::class),
             );
         });
     }

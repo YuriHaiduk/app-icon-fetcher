@@ -14,8 +14,6 @@ use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
-use RuntimeException;
 
 final class FetchAppIconsServiceTest extends TestCase
 {
@@ -59,7 +57,7 @@ final class FetchAppIconsServiceTest extends TestCase
     public function test_it_does_not_treat_google_client_failure_as_full_service_failure(): void
     {
         $appleClient = FakeAppIconClient::found(StoreType::Apple, 'https://example.test/apple.png');
-        $googleClient = FakeAppIconClient::throwing(StoreType::Google);
+        $googleClient = FakeAppIconClient::failed(StoreType::Google);
 
         $result = $this->service($appleClient, $googleClient)->fetch('com.u1.relax.minigame3');
 
@@ -118,7 +116,6 @@ final class FetchAppIconsServiceTest extends TestCase
             appleClient: $appleClient,
             googleClient: $googleClient,
             cache: new Repository(new ArrayStore),
-            logger: new NullLogger,
         );
     }
 }
@@ -131,7 +128,6 @@ final class FakeAppIconClient implements AppIconClientInterface
         private readonly StoreType $store,
         private readonly StoreIconResult $result,
         private readonly bool $supports,
-        private readonly bool $throws,
     ) {}
 
     public static function found(StoreType $store, string $iconUrl, bool $supports = true): self
@@ -140,7 +136,6 @@ final class FakeAppIconClient implements AppIconClientInterface
             store: $store,
             result: StoreIconResult::found($store, $iconUrl),
             supports: $supports,
-            throws: false,
         );
     }
 
@@ -153,17 +148,18 @@ final class FakeAppIconClient implements AppIconClientInterface
                 StoreType::Google => 'Icon was not found in Google Play.',
             }),
             supports: $supports,
-            throws: false,
         );
     }
 
-    public static function throwing(StoreType $store): self
+    public static function failed(StoreType $store): self
     {
         return new self(
             store: $store,
-            result: StoreIconResult::failed($store, 'Unused result.'),
+            result: StoreIconResult::failed($store, match ($store) {
+                StoreType::Apple => 'Apple App Store is temporarily unavailable.',
+                StoreType::Google => 'Google Play is temporarily unavailable.',
+            }),
             supports: true,
-            throws: true,
         );
     }
 
@@ -180,10 +176,6 @@ final class FakeAppIconClient implements AppIconClientInterface
     public function fetch(NormalizedAppInput $input): StoreIconResult
     {
         $this->fetchCalls++;
-
-        if ($this->throws) {
-            throw new RuntimeException('Client failed unexpectedly.');
-        }
 
         return $this->result;
     }
