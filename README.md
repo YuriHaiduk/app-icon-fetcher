@@ -49,34 +49,42 @@ id6503284107
 
 ## Quick Start
 
-Copy the Docker environment file:
+Clone the repository and open the project directory:
+
+```sh
+git clone https://github.com/YuriHaiduk/app-icon-fetcher.git
+cd app-icon-fetcher
+```
+
+Copy environment files:
 
 ```sh
 cp .env.docker.example .env.docker
+cp backend/.env.example backend/.env
+```
+
+Install Composer dependencies using a temporary PHP container:
+
+```sh
+docker compose -f docker-compose.local.yml --env-file .env.docker run --rm php composer install
+```
+
+Install frontend dependencies using a temporary Node container:
+
+```sh
+docker compose -f docker-compose.local.yml --env-file .env.docker run --rm node npm install
 ```
 
 Start containers:
 
 ```sh
-docker compose -f docker-compose.local.yml --env-file .env.docker up -d
+docker compose -f docker-compose.local.yml --env-file .env.docker up -d --build
 ```
 
-Install Composer dependencies:
+Check that all containers are running:
 
 ```sh
-docker compose -f docker-compose.local.yml --env-file .env.docker exec -T php composer install
-```
-
-Install frontend dependencies:
-
-```sh
-docker compose -f docker-compose.local.yml --env-file .env.docker exec -T node npm install
-```
-
-Copy Laravel environment file:
-
-```sh
-cp backend/.env.example backend/.env
+docker compose -f docker-compose.local.yml --env-file .env.docker ps
 ```
 
 Generate application key:
@@ -91,7 +99,9 @@ Run migrations:
 docker compose -f docker-compose.local.yml --env-file .env.docker exec -T php php artisan migrate
 ```
 
-Build frontend assets:
+For local development, the Node container runs the Vite dev server automatically.
+
+Optional: build frontend assets for a production-like check:
 
 ```sh
 docker compose -f docker-compose.local.yml --env-file .env.docker exec -T node npm run build
