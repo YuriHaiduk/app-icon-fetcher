@@ -9,6 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
+use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
 use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
 use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
 
@@ -21,13 +22,16 @@ class AppIconFetcherBindingServiceProvider extends ServiceProvider
     {
         $this->app->singleton(AppleAppStoreIconClient::class);
         $this->app->singleton(GooglePlayIconClient::class);
+        $this->app->singleton(FetchAppIconsCache::class, function (Application $app): FetchAppIconsCache {
+            return new FetchAppIconsCache($app->make(CacheRepository::class));
+        });
 
         $this->app->singleton(FetchAppIconsService::class, function (Application $app): FetchAppIconsService {
             return new FetchAppIconsService(
                 inputResolver: $app->make(AppInputResolver::class),
                 appleClient: $app->make(AppleAppStoreIconClient::class),
                 googleClient: $app->make(GooglePlayIconClient::class),
-                cache: $app->make(CacheRepository::class),
+                cache: $app->make(FetchAppIconsCache::class),
             );
         });
     }

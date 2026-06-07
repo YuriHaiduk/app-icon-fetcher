@@ -11,6 +11,7 @@ use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
+use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 use PHPUnit\Framework\TestCase;
@@ -115,7 +116,7 @@ final class FetchAppIconsServiceTest extends TestCase
             inputResolver: new AppInputResolver,
             appleClient: $appleClient,
             googleClient: $googleClient,
-            cache: new Repository(new ArrayStore),
+            cache: new FetchAppIconsCache(new Repository(new ArrayStore)),
         );
     }
 }
