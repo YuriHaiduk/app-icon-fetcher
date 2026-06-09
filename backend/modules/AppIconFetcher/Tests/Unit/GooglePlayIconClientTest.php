@@ -6,9 +6,9 @@ namespace Modules\AppIconFetcher\Tests\Unit;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\Enums\AppInputType;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputType;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
 use Tests\TestCase;
 
@@ -134,9 +134,9 @@ final class GooglePlayIconClientTest extends TestCase
         return new GooglePlayIconClient;
     }
 
-    private function bundleInput(): NormalizedAppInput
+    private function bundleInput(): NormalizedAppInputDto
     {
-        return new NormalizedAppInput(
+        return new NormalizedAppInputDto(
             originalInput: 'com.u1.relax.minigame3',
             type: AppInputType::BundleId,
             bundleId: 'com.u1.relax.minigame3',
@@ -144,9 +144,9 @@ final class GooglePlayIconClientTest extends TestCase
         );
     }
 
-    private function appleOnlyInput(): NormalizedAppInput
+    private function appleOnlyInput(): NormalizedAppInputDto
     {
-        return new NormalizedAppInput(
+        return new NormalizedAppInputDto(
             originalInput: 'https://apps.apple.com/ua/app/pubg-mobile/id1330123889?l=ru',
             type: AppInputType::AppleAppStoreUrl,
             bundleId: null,

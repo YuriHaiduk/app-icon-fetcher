@@ -6,8 +6,8 @@ namespace Modules\AppIconFetcher\Presentation\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Modules\AppIconFetcher\Application\DTO\FetchAppIconsResult;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
+use Modules\AppIconFetcher\Application\UseCases\FetchAppIcons\FetchAppIconsResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
 
 final class FetchAppIconsResource extends JsonResource
 {
@@ -22,7 +22,7 @@ final class FetchAppIconsResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        /** @var FetchAppIconsResult $result */
+        /** @var FetchAppIconsResultDto $result */
         $result = $this->resource;
 
         return [
@@ -42,7 +42,7 @@ final class FetchAppIconsResource extends JsonResource
     /**
      * @return array{found: bool, icon_url: string|null, message: string|null}
      */
-    private function storeResult(StoreIconResult $result): array
+    private function storeResult(StoreIconResultDto $result): array
     {
         return [
             'found' => $result->found,

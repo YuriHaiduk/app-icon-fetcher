@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\AppIconFetcher\Tests\Unit;
 
-use Modules\AppIconFetcher\Application\Contracts\AppInputTypeResolverInterface;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\Enums\AppInputType;
-use Modules\AppIconFetcher\Application\InputResolvers\AppleAppIdResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\AppleAppStoreUrlResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\BundleIdResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\GooglePlayUrlResolver;
-use Modules\AppIconFetcher\Application\Services\AppInputResolver;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputTypeResolverInterface;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputType;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\AppleAppIdResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\AppleAppStoreUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\BundleIdResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\GooglePlayUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputResolver;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 use PHPUnit\Framework\TestCase;
 
@@ -170,9 +170,9 @@ final class AppInputResolverTest extends TestCase
                     return $input === 'com.example.app';
                 }
 
-                public function resolve(string $input): NormalizedAppInput
+                public function resolve(string $input): NormalizedAppInputDto
                 {
-                    return new NormalizedAppInput(
+                    return new NormalizedAppInputDto(
                         originalInput: $input,
                         type: AppInputType::BundleId,
                         bundleId: 'first.resolver',
@@ -187,9 +187,9 @@ final class AppInputResolverTest extends TestCase
                     return $input === 'com.example.app';
                 }
 
-                public function resolve(string $input): NormalizedAppInput
+                public function resolve(string $input): NormalizedAppInputDto
                 {
-                    return new NormalizedAppInput(
+                    return new NormalizedAppInputDto(
                         originalInput: $input,
                         type: AppInputType::BundleId,
                         bundleId: 'second.resolver',

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Application\Enums;
+namespace Modules\AppIconFetcher\Application\InputResolving;
 
 enum AppInputType: string
 {

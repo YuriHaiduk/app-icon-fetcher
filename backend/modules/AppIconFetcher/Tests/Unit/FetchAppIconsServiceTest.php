@@ -6,15 +6,15 @@ namespace Modules\AppIconFetcher\Tests\Unit;
 
 use Illuminate\Cache\ArrayStore;
 use Illuminate\Cache\Repository;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
-use Modules\AppIconFetcher\Application\InputResolvers\AppleAppIdResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\AppleAppStoreUrlResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\BundleIdResolver;
-use Modules\AppIconFetcher\Application\InputResolvers\GooglePlayUrlResolver;
-use Modules\AppIconFetcher\Application\Services\AppInputResolver;
-use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\AppleAppIdResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\AppleAppStoreUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\BundleIdResolver;
+use Modules\AppIconFetcher\Application\InputResolving\Resolvers\GooglePlayUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputResolver;
+use Modules\AppIconFetcher\Application\UseCases\FetchAppIcons\FetchAppIconsService;
 use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
@@ -136,7 +136,7 @@ final class FakeAppIconClient implements AppIconClientInterface
 
     private function __construct(
         private readonly StoreType $store,
-        private readonly StoreIconResult $result,
+        private readonly StoreIconResultDto $result,
         private readonly bool $supports,
     ) {}
 
@@ -144,7 +144,7 @@ final class FakeAppIconClient implements AppIconClientInterface
     {
         return new self(
             store: $store,
-            result: StoreIconResult::found($store, $iconUrl),
+            result: StoreIconResultDto::found($store, $iconUrl),
             supports: $supports,
         );
     }
@@ -153,7 +153,7 @@ final class FakeAppIconClient implements AppIconClientInterface
     {
         return new self(
             store: $store,
-            result: StoreIconResult::notFound($store, match ($store) {
+            result: StoreIconResultDto::notFound($store, match ($store) {
                 StoreType::Apple => 'Icon was not found in Apple App Store.',
                 StoreType::Google => 'Icon was not found in Google Play.',
             }),
@@ -165,7 +165,7 @@ final class FakeAppIconClient implements AppIconClientInterface
     {
         return new self(
             store: $store,
-            result: StoreIconResult::failed($store, match ($store) {
+            result: StoreIconResultDto::failed($store, match ($store) {
                 StoreType::Apple => 'Apple App Store is temporarily unavailable.',
                 StoreType::Google => 'Google Play is temporarily unavailable.',
             }),
@@ -178,12 +178,12 @@ final class FakeAppIconClient implements AppIconClientInterface
         return $this->store;
     }
 
-    public function supports(NormalizedAppInput $input): bool
+    public function supports(NormalizedAppInputDto $input): bool
     {
         return $this->supports;
     }
 
-    public function fetch(NormalizedAppInput $input): StoreIconResult
+    public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {
         $this->fetchCalls++;
 

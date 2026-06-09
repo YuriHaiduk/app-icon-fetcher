@@ -7,9 +7,9 @@ namespace Modules\AppIconFetcher\Infrastructure\Clients;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Throwable;
 
@@ -22,12 +22,12 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
         return StoreType::Apple;
     }
 
-    public function supports(NormalizedAppInput $input): bool
+    public function supports(NormalizedAppInputDto $input): bool
     {
         return $input->appleAppId !== null || $input->bundleId !== null;
     }
 
-    public function fetch(NormalizedAppInput $input): StoreIconResult
+    public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {
         try {
             $response = $this->lookup($input);
@@ -46,7 +46,7 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
         }
     }
 
-    private function lookup(NormalizedAppInput $input): Response
+    private function lookup(NormalizedAppInputDto $input): Response
     {
         return Http::acceptJson()
             ->timeout(5)
@@ -57,7 +57,7 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
     /**
      * @return array{id?: string, bundleId?: string}
      */
-    private function lookupQuery(NormalizedAppInput $input): array
+    private function lookupQuery(NormalizedAppInputDto $input): array
     {
         if ($input->appleAppId !== null) {
             return ['id' => $input->appleAppId];
@@ -70,7 +70,7 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
         return [];
     }
 
-    private function parseResponse(Response $response): StoreIconResult
+    private function parseResponse(Response $response): StoreIconResultDto
     {
         $payload = $response->json();
 
@@ -81,16 +81,16 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
         $results = $payload['results'] ?? [];
 
         if (($payload['resultCount'] ?? 0) === 0 || ! is_array($results) || $results === []) {
-            return StoreIconResult::notFound(StoreType::Apple, 'Icon was not found in Apple App Store.');
+            return StoreIconResultDto::notFound(StoreType::Apple, 'Icon was not found in Apple App Store.');
         }
 
         $iconUrl = $this->extractIconUrl($results[0]);
 
         if ($iconUrl === null) {
-            return StoreIconResult::notFound(StoreType::Apple, 'Icon URL was not found in Apple App Store response.');
+            return StoreIconResultDto::notFound(StoreType::Apple, 'Icon URL was not found in Apple App Store response.');
         }
 
-        return StoreIconResult::found(StoreType::Apple, $iconUrl);
+        return StoreIconResultDto::found(StoreType::Apple, $iconUrl);
     }
 
     private function extractIconUrl(mixed $result): ?string
@@ -104,12 +104,12 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
         return is_string($iconUrl) && $iconUrl !== '' ? $iconUrl : null;
     }
 
-    private function failed(): StoreIconResult
+    private function failed(): StoreIconResultDto
     {
-        return StoreIconResult::failed(StoreType::Apple, 'Apple App Store is temporarily unavailable.');
+        return StoreIconResultDto::failed(StoreType::Apple, 'Apple App Store is temporarily unavailable.');
     }
 
-    private function logFailure(NormalizedAppInput $input, string $message): void
+    private function logFailure(NormalizedAppInputDto $input, string $message): void
     {
         Log::warning('Apple App Store icon lookup failed.', [
             'store' => StoreType::Apple->value,

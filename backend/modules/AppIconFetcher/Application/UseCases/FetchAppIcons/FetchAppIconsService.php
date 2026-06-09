@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Application\Services;
+namespace Modules\AppIconFetcher\Application\UseCases\FetchAppIcons;
 
-use Modules\AppIconFetcher\Application\DTO\FetchAppIconsResult;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputResolver;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 
@@ -20,7 +20,7 @@ final readonly class FetchAppIconsService
         private FetchAppIconsCache $cache,
     ) {}
 
-    public function fetch(string $input): FetchAppIconsResult
+    public function fetch(string $input): FetchAppIconsResultDto
     {
         $normalizedInput = $this->inputResolver->resolve($input);
         $cachedResult = $this->cache->get($normalizedInput);
@@ -29,7 +29,7 @@ final readonly class FetchAppIconsService
             return $cachedResult;
         }
 
-        $result = new FetchAppIconsResult(
+        $result = new FetchAppIconsResultDto(
             input: $normalizedInput,
             apple: $this->fetchClient($normalizedInput, $this->appleClient),
             google: $this->fetchClient($normalizedInput, $this->googleClient),
@@ -40,12 +40,12 @@ final readonly class FetchAppIconsService
         return $result;
     }
 
-    private function fetchClient(NormalizedAppInput $input, AppIconClientInterface $client): StoreIconResult
+    private function fetchClient(NormalizedAppInputDto $input, AppIconClientInterface $client): StoreIconResultDto
     {
         $store = $client->store();
 
         if (! $client->supports($input)) {
-            return StoreIconResult::notSupported($store, $this->notSupportedMessage($store));
+            return StoreIconResultDto::notSupported($store, $this->notSupportedMessage($store));
         }
 
         return $client->fetch($input);

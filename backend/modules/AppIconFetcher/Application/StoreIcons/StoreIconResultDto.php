@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Application\DTO;
+namespace Modules\AppIconFetcher\Application\StoreIcons;
 
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 
-final readonly class StoreIconResult
+final readonly class StoreIconResultDto
 {
     public function __construct(
         public StoreType $store,

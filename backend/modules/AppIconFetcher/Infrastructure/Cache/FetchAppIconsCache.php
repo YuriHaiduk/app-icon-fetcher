@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\AppIconFetcher\Infrastructure\Cache;
 
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
-use Modules\AppIconFetcher\Application\DTO\FetchAppIconsResult;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
-use Modules\AppIconFetcher\Application\Enums\AppInputType;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\UseCases\FetchAppIcons\FetchAppIconsResultDto;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputType;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 
 final readonly class FetchAppIconsCache
 {
@@ -19,7 +19,7 @@ final readonly class FetchAppIconsCache
         private CacheRepository $cache,
     ) {}
 
-    public function get(NormalizedAppInput $input): ?FetchAppIconsResult
+    public function get(NormalizedAppInputDto $input): ?FetchAppIconsResultDto
     {
         $cachedResult = $this->cache->get($this->cacheKey($input));
 
@@ -30,12 +30,12 @@ final readonly class FetchAppIconsCache
         return $this->resultFromCache($cachedResult);
     }
 
-    public function put(NormalizedAppInput $input, FetchAppIconsResult $result): void
+    public function put(NormalizedAppInputDto $input, FetchAppIconsResultDto $result): void
     {
         $this->cache->put($this->cacheKey($input), $this->resultToCache($result), self::CacheTtlSeconds);
     }
 
-    private function cacheKey(NormalizedAppInput $input): string
+    private function cacheKey(NormalizedAppInputDto $input): string
     {
         return sprintf(
             'app_icon_fetcher:%s:%s',
@@ -51,7 +51,7 @@ final readonly class FetchAppIconsCache
      *     google: array{store: string, found: bool, iconUrl: string|null, message: string|null}
      * }
      */
-    private function resultToCache(FetchAppIconsResult $result): array
+    private function resultToCache(FetchAppIconsResultDto $result): array
     {
         return [
             'input' => [
@@ -72,10 +72,10 @@ final readonly class FetchAppIconsCache
      *     google: array{store: string, found: bool, iconUrl: string|null, message: string|null}
      * }  $cachedResult
      */
-    private function resultFromCache(array $cachedResult): FetchAppIconsResult
+    private function resultFromCache(array $cachedResult): FetchAppIconsResultDto
     {
-        return new FetchAppIconsResult(
-            input: new NormalizedAppInput(
+        return new FetchAppIconsResultDto(
+            input: new NormalizedAppInputDto(
                 originalInput: $cachedResult['input']['originalInput'],
                 type: AppInputType::from($cachedResult['input']['type']),
                 bundleId: $cachedResult['input']['bundleId'],
@@ -89,7 +89,7 @@ final readonly class FetchAppIconsCache
     /**
      * @return array{store: string, found: bool, iconUrl: string|null, message: string|null}
      */
-    private function storeResultToCache(StoreIconResult $result): array
+    private function storeResultToCache(StoreIconResultDto $result): array
     {
         return [
             'store' => $result->store->value,
@@ -102,9 +102,9 @@ final readonly class FetchAppIconsCache
     /**
      * @param  array{store: string, found: bool, iconUrl: string|null, message: string|null}  $cachedResult
      */
-    private function storeResultFromCache(array $cachedResult): StoreIconResult
+    private function storeResultFromCache(array $cachedResult): StoreIconResultDto
     {
-        return new StoreIconResult(
+        return new StoreIconResultDto(
             store: StoreType::from($cachedResult['store']),
             found: $cachedResult['found'],
             iconUrl: $cachedResult['iconUrl'],

@@ -6,9 +6,9 @@ namespace Modules\AppIconFetcher\Tests\Unit;
 
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\Enums\AppInputType;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputType;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
 use Tests\TestCase;
 
@@ -26,7 +26,7 @@ final class AppleAppStoreIconClientTest extends TestCase
 
     public function test_it_does_not_support_input_without_apple_app_id_and_bundle_id(): void
     {
-        $input = new NormalizedAppInput(
+        $input = new NormalizedAppInputDto(
             originalInput: 'unsupported',
             type: AppInputType::AppleAppStoreUrl,
             bundleId: null,
@@ -133,9 +133,9 @@ final class AppleAppStoreIconClientTest extends TestCase
         return new AppleAppStoreIconClient;
     }
 
-    private function bundleInput(): NormalizedAppInput
+    private function bundleInput(): NormalizedAppInputDto
     {
-        return new NormalizedAppInput(
+        return new NormalizedAppInputDto(
             originalInput: 'com.u1.relax.minigame3',
             type: AppInputType::BundleId,
             bundleId: 'com.u1.relax.minigame3',
@@ -143,9 +143,9 @@ final class AppleAppStoreIconClientTest extends TestCase
         );
     }
 
-    private function appleInput(): NormalizedAppInput
+    private function appleInput(): NormalizedAppInputDto
     {
-        return new NormalizedAppInput(
+        return new NormalizedAppInputDto(
             originalInput: 'https://apps.apple.com/ua/app/pubg-mobile/id1330123889?l=ru',
             type: AppInputType::AppleAppStoreUrl,
             bundleId: null,

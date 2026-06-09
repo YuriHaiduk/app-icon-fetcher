@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Application\InputResolvers;
+namespace Modules\AppIconFetcher\Application\InputResolving\Resolvers;
 
-use Modules\AppIconFetcher\Application\Contracts\AppInputTypeResolverInterface;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\Enums\AppInputType;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputTypeResolverInterface;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputType;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 
 final readonly class AppleAppStoreUrlResolver implements AppInputTypeResolverInterface
@@ -16,7 +16,7 @@ final readonly class AppleAppStoreUrlResolver implements AppInputTypeResolverInt
         return $this->host($input) === 'apps.apple.com';
     }
 
-    public function resolve(string $input): NormalizedAppInput
+    public function resolve(string $input): NormalizedAppInputDto
     {
         $path = parse_url($input, PHP_URL_PATH);
 
@@ -24,7 +24,7 @@ final readonly class AppleAppStoreUrlResolver implements AppInputTypeResolverInt
             throw new InvalidAppInputException('Apple App Store URL must include a valid app ID.');
         }
 
-        return new NormalizedAppInput(
+        return new NormalizedAppInputDto(
             originalInput: $input,
             type: AppInputType::AppleAppStoreUrl,
             bundleId: null,

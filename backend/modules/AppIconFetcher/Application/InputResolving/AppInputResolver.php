@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Application\Services;
+namespace Modules\AppIconFetcher\Application\InputResolving;
 
-use Modules\AppIconFetcher\Application\Contracts\AppInputTypeResolverInterface;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
+use Modules\AppIconFetcher\Application\InputResolving\AppInputTypeResolverInterface;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 
 final readonly class AppInputResolver
@@ -17,7 +17,7 @@ final readonly class AppInputResolver
         private iterable $resolvers,
     ) {}
 
-    public function resolve(string $input): NormalizedAppInput
+    public function resolve(string $input): NormalizedAppInputDto
     {
         $originalInput = trim($input);
 

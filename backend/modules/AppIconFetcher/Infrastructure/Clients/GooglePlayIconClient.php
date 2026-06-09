@@ -7,9 +7,9 @@ namespace Modules\AppIconFetcher\Infrastructure\Clients;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
-use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
-use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Throwable;
 
@@ -24,22 +24,22 @@ final class GooglePlayIconClient implements AppIconClientInterface
         return StoreType::Google;
     }
 
-    public function supports(NormalizedAppInput $input): bool
+    public function supports(NormalizedAppInputDto $input): bool
     {
         return $input->bundleId !== null;
     }
 
-    public function fetch(NormalizedAppInput $input): StoreIconResult
+    public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {
         if ($input->bundleId === null) {
-            return StoreIconResult::notSupported(StoreType::Google, 'Google Play lookup requires a bundle/package id.');
+            return StoreIconResultDto::notSupported(StoreType::Google, 'Google Play lookup requires a bundle/package id.');
         }
 
         try {
             $response = $this->lookup($input->bundleId);
 
             if ($response->status() === 404) {
-                return StoreIconResult::notFound(StoreType::Google, 'Icon was not found in Google Play.');
+                return StoreIconResultDto::notFound(StoreType::Google, 'Icon was not found in Google Play.');
             }
 
             if ($response->failed()) {
@@ -68,15 +68,15 @@ final class GooglePlayIconClient implements AppIconClientInterface
             ]);
     }
 
-    private function parseResponse(Response $response): StoreIconResult
+    private function parseResponse(Response $response): StoreIconResultDto
     {
         $iconUrl = $this->extractIconUrl($response->body());
 
         if ($iconUrl === null) {
-            return StoreIconResult::notFound(StoreType::Google, 'Icon URL was not found in Google Play response.');
+            return StoreIconResultDto::notFound(StoreType::Google, 'Icon URL was not found in Google Play response.');
         }
 
-        return StoreIconResult::found(StoreType::Google, $iconUrl);
+        return StoreIconResultDto::found(StoreType::Google, $iconUrl);
     }
 
     private function extractIconUrl(string $html): ?string
@@ -105,12 +105,12 @@ final class GooglePlayIconClient implements AppIconClientInterface
                 : null;
     }
 
-    private function failed(): StoreIconResult
+    private function failed(): StoreIconResultDto
     {
-        return StoreIconResult::failed(StoreType::Google, 'Google Play is temporarily unavailable.');
+        return StoreIconResultDto::failed(StoreType::Google, 'Google Play is temporarily unavailable.');
     }
 
-    private function logFailure(NormalizedAppInput $input, string $message): void
+    private function logFailure(NormalizedAppInputDto $input, string $message): void
     {
         Log::warning('Google Play icon lookup failed.', [
             'store' => StoreType::Google->value,

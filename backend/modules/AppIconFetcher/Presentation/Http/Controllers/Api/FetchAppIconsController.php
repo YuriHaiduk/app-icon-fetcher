@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Modules\AppIconFetcher\Presentation\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
+use Modules\AppIconFetcher\Application\UseCases\FetchAppIcons\FetchAppIconsService;
 use Modules\AppIconFetcher\Presentation\Http\Requests\FetchAppIconsRequest;
 use Modules\AppIconFetcher\Presentation\Http\Resources\FetchAppIconsResource;
 use Symfony\Component\HttpFoundation\Response;
