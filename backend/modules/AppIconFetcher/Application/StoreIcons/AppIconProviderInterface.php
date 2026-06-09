@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Modules\AppIconFetcher\Infrastructure\Contracts;
+namespace Modules\AppIconFetcher\Application\StoreIcons;
 
 use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
-use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
 
-interface AppIconClientInterface
+interface AppIconProviderInterface
 {
+    public function store(): StoreType;
+
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto;
 }

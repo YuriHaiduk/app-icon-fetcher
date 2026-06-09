@@ -17,33 +17,37 @@ use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
 use Modules\AppIconFetcher\Infrastructure\Clients\AppleAppStoreIconClient;
 use Modules\AppIconFetcher\Infrastructure\Clients\GooglePlayIconClient;
 
-class AppIconFetcherBindingServiceProvider extends ServiceProvider
+final class AppIconFetcherBindingServiceProvider extends ServiceProvider
 {
-    /**
-     * Register module bindings.
-     */
+    private const AppIconProvidersTag = 'app-icon-fetcher.providers';
+
     public function register(): void
     {
         $this->app->singleton(AppleAppStoreIconClient::class);
         $this->app->singleton(GooglePlayIconClient::class);
+
+        $this->app->tag([
+            AppleAppStoreIconClient::class,
+            GooglePlayIconClient::class,
+        ], self::AppIconProvidersTag);
+
         $this->app->singleton(FetchAppIconsCache::class, function (Application $app): FetchAppIconsCache {
             return new FetchAppIconsCache($app->make(CacheRepository::class));
         });
 
-        $this->app->singleton(AppInputResolver::class, function (): AppInputResolver {
+        $this->app->singleton(AppInputResolver::class, function (Application $app): AppInputResolver {
             return new AppInputResolver([
-                new GooglePlayUrlResolver,
-                new AppleAppStoreUrlResolver,
-                new AppleAppIdResolver,
-                new BundleIdResolver,
+                $app->make(GooglePlayUrlResolver::class),
+                $app->make(AppleAppStoreUrlResolver::class),
+                $app->make(AppleAppIdResolver::class),
+                $app->make(BundleIdResolver::class),
             ]);
         });
 
         $this->app->singleton(FetchAppIconsService::class, function (Application $app): FetchAppIconsService {
             return new FetchAppIconsService(
                 inputResolver: $app->make(AppInputResolver::class),
-                appleClient: $app->make(AppleAppStoreIconClient::class),
-                googleClient: $app->make(GooglePlayIconClient::class),
+                providers: $app->tagged(self::AppIconProvidersTag),
                 cache: $app->make(FetchAppIconsCache::class),
             );
         });

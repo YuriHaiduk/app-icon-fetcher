@@ -9,7 +9,7 @@ use Modules\AppIconFetcher\Providers\AppIconFetcherBindingServiceProvider;
 use Modules\AppIconFetcher\Providers\AppIconFetcherDatabaseServiceProvider;
 use Modules\AppIconFetcher\Providers\AppIconFetcherRouteServiceProvider;
 
-class AppIconFetcherServiceProvider extends ServiceProvider
+final class AppIconFetcherServiceProvider extends ServiceProvider
 {
     /**
      * Register any module services.

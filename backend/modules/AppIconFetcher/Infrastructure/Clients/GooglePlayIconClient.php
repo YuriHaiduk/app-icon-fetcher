@@ -8,16 +8,21 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\AppIconProviderInterface;
 use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
 use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Throwable;
 
-final class GooglePlayIconClient implements AppIconClientInterface
+final class GooglePlayIconClient implements AppIconProviderInterface
 {
     private const DetailsUrl = 'https://play.google.com/store/apps/details';
 
     private const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
+
+    public function store(): StoreType
+    {
+        return StoreType::Google;
+    }
 
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {

@@ -7,7 +7,7 @@ namespace Modules\AppIconFetcher\Providers;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
-class AppIconFetcherRouteServiceProvider extends ServiceProvider
+final class AppIconFetcherRouteServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap module routes.

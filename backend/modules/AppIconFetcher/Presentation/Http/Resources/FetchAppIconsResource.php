@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\AppIconFetcher\Application\UseCases\FetchAppIcons\FetchAppIconsResultDto;
 use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
+use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
 
 final class FetchAppIconsResource extends JsonResource
 {
@@ -33,8 +34,8 @@ final class FetchAppIconsResource extends JsonResource
                 'apple_app_id' => $result->input->appleAppId,
             ],
             'icons' => [
-                'apple' => $this->storeResult($result->apple),
-                'google' => $this->storeResult($result->google),
+                'apple' => $this->storeResult($result->resultFor(StoreType::Apple)),
+                'google' => $this->storeResult($result->resultFor(StoreType::Google)),
             ],
         ];
     }

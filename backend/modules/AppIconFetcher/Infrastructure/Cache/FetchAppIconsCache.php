@@ -47,12 +47,17 @@ final readonly class FetchAppIconsCache
     /**
      * @return array{
      *     input: array{originalInput: string, type: string, bundleId: string|null, appleAppId: string|null},
-     *     apple: array{store: string, found: bool, iconUrl: string|null, message: string|null},
-     *     google: array{store: string, found: bool, iconUrl: string|null, message: string|null}
+     *     icons: array<string, array{store: string, found: bool, iconUrl: string|null, message: string|null}>
      * }
      */
     private function resultToCache(FetchAppIconsResultDto $result): array
     {
+        $icons = [];
+
+        foreach ($result->icons as $store => $storeResult) {
+            $icons[$store] = $this->storeResultToCache($storeResult);
+        }
+
         return [
             'input' => [
                 'originalInput' => $result->input->originalInput,
@@ -60,20 +65,24 @@ final readonly class FetchAppIconsCache
                 'bundleId' => $result->input->bundleId,
                 'appleAppId' => $result->input->appleAppId,
             ],
-            'apple' => $this->storeResultToCache($result->apple),
-            'google' => $this->storeResultToCache($result->google),
+            'icons' => $icons,
         ];
     }
 
     /**
      * @param  array{
      *     input: array{originalInput: string, type: string, bundleId: string|null, appleAppId: string|null},
-     *     apple: array{store: string, found: bool, iconUrl: string|null, message: string|null},
-     *     google: array{store: string, found: bool, iconUrl: string|null, message: string|null}
+     *     icons: array<string, array{store: string, found: bool, iconUrl: string|null, message: string|null}>
      * }  $cachedResult
      */
     private function resultFromCache(array $cachedResult): FetchAppIconsResultDto
     {
+        $icons = [];
+
+        foreach ($cachedResult['icons'] as $store => $storeResult) {
+            $icons[$store] = $this->storeResultFromCache($storeResult);
+        }
+
         return new FetchAppIconsResultDto(
             input: new NormalizedAppInputDto(
                 originalInput: $cachedResult['input']['originalInput'],
@@ -81,8 +90,7 @@ final readonly class FetchAppIconsCache
                 bundleId: $cachedResult['input']['bundleId'],
                 appleAppId: $cachedResult['input']['appleAppId'],
             ),
-            apple: $this->storeResultFromCache($cachedResult['apple']),
-            google: $this->storeResultFromCache($cachedResult['google']),
+            icons: $icons,
         );
     }
 

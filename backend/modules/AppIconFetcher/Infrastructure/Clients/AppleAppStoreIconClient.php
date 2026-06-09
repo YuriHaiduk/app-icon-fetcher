@@ -8,14 +8,19 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Modules\AppIconFetcher\Application\InputResolving\NormalizedAppInputDto;
+use Modules\AppIconFetcher\Application\StoreIcons\AppIconProviderInterface;
 use Modules\AppIconFetcher\Application\StoreIcons\StoreIconResultDto;
 use Modules\AppIconFetcher\Application\StoreIcons\StoreType;
-use Modules\AppIconFetcher\Infrastructure\Contracts\AppIconClientInterface;
 use Throwable;
 
-final class AppleAppStoreIconClient implements AppIconClientInterface
+final class AppleAppStoreIconClient implements AppIconProviderInterface
 {
     private const LookupUrl = 'https://itunes.apple.com/lookup';
+
+    public function store(): StoreType
+    {
+        return StoreType::Apple;
+    }
 
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {

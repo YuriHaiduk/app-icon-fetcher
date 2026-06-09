@@ -27,8 +27,10 @@ final class FetchAppIconsCacheTest extends TestCase
         );
         $result = new FetchAppIconsResultDto(
             input: $input,
-            apple: StoreIconResultDto::found(StoreType::Apple, 'https://example.test/apple.png'),
-            google: StoreIconResultDto::notFound(StoreType::Google, 'Icon was not found in Google Play.'),
+            icons: [
+                StoreType::Apple->value => StoreIconResultDto::found(StoreType::Apple, 'https://example.test/apple.png'),
+                StoreType::Google->value => StoreIconResultDto::notFound(StoreType::Google, 'Icon was not found in Google Play.'),
+            ],
         );
 
         $cache->put($input, $result);
@@ -45,14 +47,14 @@ final class FetchAppIconsCacheTest extends TestCase
         $this->assertSame(AppInputType::BundleId, $cachedResult->input->type);
         $this->assertSame('com.u1.relax.minigame3', $cachedResult->input->bundleId);
         $this->assertNull($cachedResult->input->appleAppId);
-        $this->assertSame(StoreType::Apple, $cachedResult->apple->store);
-        $this->assertTrue($cachedResult->apple->found);
-        $this->assertSame('https://example.test/apple.png', $cachedResult->apple->iconUrl);
-        $this->assertNull($cachedResult->apple->message);
-        $this->assertSame(StoreType::Google, $cachedResult->google->store);
-        $this->assertFalse($cachedResult->google->found);
-        $this->assertNull($cachedResult->google->iconUrl);
-        $this->assertSame('Icon was not found in Google Play.', $cachedResult->google->message);
+        $this->assertSame(StoreType::Apple, $cachedResult->resultFor(StoreType::Apple)->store);
+        $this->assertTrue($cachedResult->resultFor(StoreType::Apple)->found);
+        $this->assertSame('https://example.test/apple.png', $cachedResult->resultFor(StoreType::Apple)->iconUrl);
+        $this->assertNull($cachedResult->resultFor(StoreType::Apple)->message);
+        $this->assertSame(StoreType::Google, $cachedResult->resultFor(StoreType::Google)->store);
+        $this->assertFalse($cachedResult->resultFor(StoreType::Google)->found);
+        $this->assertNull($cachedResult->resultFor(StoreType::Google)->iconUrl);
+        $this->assertSame('Icon was not found in Google Play.', $cachedResult->resultFor(StoreType::Google)->message);
     }
 
     public function test_it_returns_null_when_cache_entry_does_not_exist(): void

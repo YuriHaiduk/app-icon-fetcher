@@ -6,7 +6,7 @@ namespace Modules\AppIconFetcher\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class AppIconFetcherDatabaseServiceProvider extends ServiceProvider
+final class AppIconFetcherDatabaseServiceProvider extends ServiceProvider
 {
     /**
      * Bootstrap module database resources.
