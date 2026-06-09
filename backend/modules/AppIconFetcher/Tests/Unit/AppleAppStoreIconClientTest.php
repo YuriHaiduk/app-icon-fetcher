@@ -14,28 +14,6 @@ use Tests\TestCase;
 
 final class AppleAppStoreIconClientTest extends TestCase
 {
-    public function test_it_supports_input_with_apple_app_id(): void
-    {
-        $this->assertTrue($this->client()->supports($this->appleInput()));
-    }
-
-    public function test_it_supports_input_with_bundle_id(): void
-    {
-        $this->assertTrue($this->client()->supports($this->bundleInput()));
-    }
-
-    public function test_it_does_not_support_input_without_apple_app_id_and_bundle_id(): void
-    {
-        $input = new NormalizedAppInputDto(
-            originalInput: 'unsupported',
-            type: AppInputType::AppleAppStoreUrl,
-            bundleId: null,
-            appleAppId: null,
-        );
-
-        $this->assertFalse($this->client()->supports($input));
-    }
-
     public function test_it_fetches_icon_by_bundle_id_using_artwork_url_512(): void
     {
         Http::fake([
@@ -126,6 +104,24 @@ final class AppleAppStoreIconClientTest extends TestCase
         $this->assertFalse($result->found);
         $this->assertNull($result->iconUrl);
         $this->assertSame('Apple App Store is temporarily unavailable.', $result->message);
+    }
+
+    public function test_it_returns_not_supported_when_fetch_is_called_without_apple_app_id_or_bundle_id(): void
+    {
+        Http::fake();
+
+        $result = $this->client()->fetch(new NormalizedAppInputDto(
+            originalInput: 'unsupported',
+            type: AppInputType::AppleAppStoreUrl,
+            bundleId: null,
+            appleAppId: null,
+        ));
+
+        $this->assertSame(StoreType::Apple, $result->store);
+        $this->assertFalse($result->found);
+        $this->assertNull($result->iconUrl);
+        $this->assertSame('Apple App Store lookup requires an Apple app id or bundle/package id.', $result->message);
+        Http::assertNothingSent();
     }
 
     private function client(): AppleAppStoreIconClient

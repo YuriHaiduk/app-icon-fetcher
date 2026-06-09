@@ -19,16 +19,6 @@ final class GooglePlayIconClient implements AppIconClientInterface
 
     private const UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
-    public function store(): StoreType
-    {
-        return StoreType::Google;
-    }
-
-    public function supports(NormalizedAppInputDto $input): bool
-    {
-        return $input->bundleId !== null;
-    }
-
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {
         if ($input->bundleId === null) {

@@ -75,7 +75,7 @@ final class FetchAppIconsServiceTest extends TestCase
 
     public function test_it_returns_not_supported_for_google_when_input_only_has_apple_app_id(): void
     {
-        $googleClient = FakeAppIconClient::found(StoreType::Google, 'https://example.test/google.png', supports: false);
+        $googleClient = FakeAppIconClient::notSupported(StoreType::Google);
 
         $result = $this->service(
             FakeAppIconClient::found(StoreType::Apple, 'https://example.test/apple.png'),
@@ -85,7 +85,7 @@ final class FetchAppIconsServiceTest extends TestCase
         $this->assertTrue($result->apple->found);
         $this->assertFalse($result->google->found);
         $this->assertSame('Google Play lookup requires a bundle/package id.', $result->google->message);
-        $this->assertSame(0, $googleClient->fetchCalls);
+        $this->assertSame(1, $googleClient->fetchCalls);
     }
 
     public function test_it_rethrows_invalid_app_input_exception_for_invalid_input(): void
@@ -135,52 +135,44 @@ final class FakeAppIconClient implements AppIconClientInterface
     public int $fetchCalls = 0;
 
     private function __construct(
-        private readonly StoreType $store,
         private readonly StoreIconResultDto $result,
-        private readonly bool $supports,
     ) {}
 
-    public static function found(StoreType $store, string $iconUrl, bool $supports = true): self
+    public static function found(StoreType $store, string $iconUrl): self
     {
         return new self(
-            store: $store,
             result: StoreIconResultDto::found($store, $iconUrl),
-            supports: $supports,
         );
     }
 
-    public static function notFound(StoreType $store, bool $supports = true): self
+    public static function notFound(StoreType $store): self
     {
         return new self(
-            store: $store,
             result: StoreIconResultDto::notFound($store, match ($store) {
                 StoreType::Apple => 'Icon was not found in Apple App Store.',
                 StoreType::Google => 'Icon was not found in Google Play.',
             }),
-            supports: $supports,
+        );
+    }
+
+    public static function notSupported(StoreType $store): self
+    {
+        return new self(
+            result: StoreIconResultDto::notSupported($store, match ($store) {
+                StoreType::Apple => 'Apple App Store lookup requires an Apple app id or bundle/package id.',
+                StoreType::Google => 'Google Play lookup requires a bundle/package id.',
+            }),
         );
     }
 
     public static function failed(StoreType $store): self
     {
         return new self(
-            store: $store,
             result: StoreIconResultDto::failed($store, match ($store) {
                 StoreType::Apple => 'Apple App Store is temporarily unavailable.',
                 StoreType::Google => 'Google Play is temporarily unavailable.',
             }),
-            supports: true,
         );
-    }
-
-    public function store(): StoreType
-    {
-        return $this->store;
-    }
-
-    public function supports(NormalizedAppInputDto $input): bool
-    {
-        return $this->supports;
     }
 
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto

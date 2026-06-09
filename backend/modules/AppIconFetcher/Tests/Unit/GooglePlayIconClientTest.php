@@ -14,16 +14,6 @@ use Tests\TestCase;
 
 final class GooglePlayIconClientTest extends TestCase
 {
-    public function test_it_supports_input_with_bundle_id(): void
-    {
-        $this->assertTrue($this->client()->supports($this->bundleInput()));
-    }
-
-    public function test_it_does_not_support_input_without_bundle_id(): void
-    {
-        $this->assertFalse($this->client()->supports($this->appleOnlyInput()));
-    }
-
     public function test_it_returns_not_supported_when_fetch_is_called_without_bundle_id(): void
     {
         Http::fake();

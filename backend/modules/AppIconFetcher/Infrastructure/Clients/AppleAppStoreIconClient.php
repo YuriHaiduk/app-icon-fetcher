@@ -17,18 +17,12 @@ final class AppleAppStoreIconClient implements AppIconClientInterface
 {
     private const LookupUrl = 'https://itunes.apple.com/lookup';
 
-    public function store(): StoreType
-    {
-        return StoreType::Apple;
-    }
-
-    public function supports(NormalizedAppInputDto $input): bool
-    {
-        return $input->appleAppId !== null || $input->bundleId !== null;
-    }
-
     public function fetch(NormalizedAppInputDto $input): StoreIconResultDto
     {
+        if ($input->appleAppId === null && $input->bundleId === null) {
+            return StoreIconResultDto::notSupported(StoreType::Apple, 'Apple App Store lookup requires an Apple app id or bundle/package id.');
+        }
+
         try {
             $response = $this->lookup($input);
 
