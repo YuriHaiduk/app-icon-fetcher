@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Badge } from '@/components/ui/badge';
+import { stores } from '../config/stores';
+import type { StoreKey } from '../config/stores';
 import type {
     FetchAppIconsData,
     StoreIconResult,
@@ -8,7 +10,7 @@ import type {
 import StoreIconCard from './StoreIconCard.vue';
 
 type StoreCard = {
-    key: keyof FetchAppIconsData['icons'];
+    key: StoreKey;
     name: string;
     result: StoreIconResult;
 };
@@ -17,18 +19,12 @@ const props = defineProps<{
     result: FetchAppIconsData;
 }>();
 
-const resultCards = computed<StoreCard[]>(() => [
-    {
-        key: 'apple',
-        name: 'Apple App Store',
-        result: props.result.icons.apple,
-    },
-    {
-        key: 'google',
-        name: 'Google Play',
-        result: props.result.icons.google,
-    },
-]);
+const resultCards = computed<StoreCard[]>(() =>
+    stores.map((store) => ({
+        ...store,
+        result: props.result.icons[store.key],
+    })),
+);
 </script>
 
 <template>

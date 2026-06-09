@@ -2,11 +2,11 @@ import type {
     FetchAppIconsData,
     FetchAppIconsResponse,
 } from '../types/app-icon-fetcher';
-
-type ErrorResponse = {
-    message?: string;
-    errors?: Record<string, string[]>;
-};
+import {
+    errorFromPayload,
+    genericFetchErrorMessage,
+} from './errors';
+import type { ErrorResponse } from './errors';
 
 export async function fetchAppIcons(
     input: string,
@@ -35,18 +35,6 @@ export async function fetchAppIcons(
             throw error;
         }
 
-        throw new Error('Unable to fetch icons right now. Please try again.');
+        throw new Error(genericFetchErrorMessage);
     }
-}
-
-function errorFromPayload(payload: FetchAppIconsResponse | ErrorResponse): string {
-    if ('errors' in payload && payload.errors?.input?.[0]) {
-        return payload.errors.input[0];
-    }
-
-    if ('message' in payload && payload.message) {
-        return payload.message;
-    }
-
-    return 'Unable to fetch icons right now. Please try again.';
 }

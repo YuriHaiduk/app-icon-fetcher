@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { CheckCircle2, Clipboard, Image as ImageIcon } from '@lucide/vue';
-import { ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +8,7 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
+import { useClipboard } from '../composables/useClipboard';
 import type { StoreIconResult } from '../types/app-icon-fetcher';
 
 const props = defineProps<{
@@ -16,25 +16,7 @@ const props = defineProps<{
     result: StoreIconResult;
 }>();
 
-const copiedUrl = ref<string | null>(null);
-const copyError = ref<string | null>(null);
-
-async function copyIconUrl(iconUrl: string): Promise<void> {
-    copyError.value = null;
-
-    if (!navigator.clipboard) {
-        copyError.value = 'Copying is not available in this browser.';
-
-        return;
-    }
-
-    try {
-        await navigator.clipboard.writeText(iconUrl);
-        copiedUrl.value = iconUrl;
-    } catch {
-        copyError.value = 'Copying is not available in this browser.';
-    }
-}
+const { copiedText, copyError, copy } = useClipboard();
 </script>
 
 <template>
@@ -71,15 +53,15 @@ async function copyIconUrl(iconUrl: string): Promise<void> {
                             type="button"
                             variant="outline"
                             size="sm"
-                            @click="copyIconUrl(result.icon_url)"
+                            @click="copy(result.icon_url)"
                         >
                             <CheckCircle2
-                                v-if="copiedUrl === result.icon_url"
+                                v-if="copiedText === result.icon_url"
                                 class="size-4"
                             />
                             <Clipboard v-else class="size-4" />
                             <span>{{
-                                copiedUrl === result.icon_url
+                                copiedText === result.icon_url
                                     ? 'Copied'
                                     : 'Copy URL'
                             }}</span>
