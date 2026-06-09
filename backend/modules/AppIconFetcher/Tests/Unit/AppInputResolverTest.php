@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\AppIconFetcher\Tests\Unit;
 
+use Modules\AppIconFetcher\Application\Contracts\AppInputTypeResolverInterface;
+use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\Enums\AppInputType;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppStoreUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\BundleIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\GooglePlayUrlResolver;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Infrastructure\Exceptions\InvalidAppInputException;
 use PHPUnit\Framework\TestCase;
@@ -154,8 +160,57 @@ final class AppInputResolverTest extends TestCase
         $this->resolver()->resolve('123');
     }
 
+    public function test_it_uses_the_first_resolver_that_supports_input(): void
+    {
+        $resolver = new AppInputResolver([
+            new class implements AppInputTypeResolverInterface
+            {
+                public function supports(string $input): bool
+                {
+                    return $input === 'com.example.app';
+                }
+
+                public function resolve(string $input): NormalizedAppInput
+                {
+                    return new NormalizedAppInput(
+                        originalInput: $input,
+                        type: AppInputType::BundleId,
+                        bundleId: 'first.resolver',
+                        appleAppId: null,
+                    );
+                }
+            },
+            new class implements AppInputTypeResolverInterface
+            {
+                public function supports(string $input): bool
+                {
+                    return $input === 'com.example.app';
+                }
+
+                public function resolve(string $input): NormalizedAppInput
+                {
+                    return new NormalizedAppInput(
+                        originalInput: $input,
+                        type: AppInputType::BundleId,
+                        bundleId: 'second.resolver',
+                        appleAppId: null,
+                    );
+                }
+            },
+        ]);
+
+        $result = $resolver->resolve('com.example.app');
+
+        $this->assertSame('first.resolver', $result->bundleId);
+    }
+
     private function resolver(): AppInputResolver
     {
-        return new AppInputResolver;
+        return new AppInputResolver([
+            new GooglePlayUrlResolver,
+            new AppleAppStoreUrlResolver,
+            new AppleAppIdResolver,
+            new BundleIdResolver,
+        ]);
     }
 }

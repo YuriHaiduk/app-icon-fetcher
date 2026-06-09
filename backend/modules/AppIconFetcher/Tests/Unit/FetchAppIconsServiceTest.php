@@ -9,6 +9,10 @@ use Illuminate\Cache\Repository;
 use Modules\AppIconFetcher\Application\DTO\NormalizedAppInput;
 use Modules\AppIconFetcher\Application\DTO\StoreIconResult;
 use Modules\AppIconFetcher\Application\Enums\StoreType;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppStoreUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\BundleIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\GooglePlayUrlResolver;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
 use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
@@ -113,7 +117,12 @@ final class FetchAppIconsServiceTest extends TestCase
     private function service(FakeAppIconClient $appleClient, FakeAppIconClient $googleClient): FetchAppIconsService
     {
         return new FetchAppIconsService(
-            inputResolver: new AppInputResolver,
+            inputResolver: new AppInputResolver([
+                new GooglePlayUrlResolver,
+                new AppleAppStoreUrlResolver,
+                new AppleAppIdResolver,
+                new BundleIdResolver,
+            ]),
             appleClient: $appleClient,
             googleClient: $googleClient,
             cache: new FetchAppIconsCache(new Repository(new ArrayStore)),

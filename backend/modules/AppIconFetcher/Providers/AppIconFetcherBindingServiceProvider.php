@@ -7,6 +7,10 @@ namespace Modules\AppIconFetcher\Providers;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\AppleAppStoreUrlResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\BundleIdResolver;
+use Modules\AppIconFetcher\Application\InputResolvers\GooglePlayUrlResolver;
 use Modules\AppIconFetcher\Application\Services\AppInputResolver;
 use Modules\AppIconFetcher\Application\Services\FetchAppIconsService;
 use Modules\AppIconFetcher\Infrastructure\Cache\FetchAppIconsCache;
@@ -24,6 +28,15 @@ class AppIconFetcherBindingServiceProvider extends ServiceProvider
         $this->app->singleton(GooglePlayIconClient::class);
         $this->app->singleton(FetchAppIconsCache::class, function (Application $app): FetchAppIconsCache {
             return new FetchAppIconsCache($app->make(CacheRepository::class));
+        });
+
+        $this->app->singleton(AppInputResolver::class, function (): AppInputResolver {
+            return new AppInputResolver([
+                new GooglePlayUrlResolver,
+                new AppleAppStoreUrlResolver,
+                new AppleAppIdResolver,
+                new BundleIdResolver,
+            ]);
         });
 
         $this->app->singleton(FetchAppIconsService::class, function (Application $app): FetchAppIconsService {
